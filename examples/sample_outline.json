@@ -1,0 +1,33 @@
+{
+    "nodes":[
+        {
+            "name": "goal",
+            "content": "Goal Impacted"
+        },
+        {
+            "name": "cause1",
+            "content": "cause1",
+            "effects": ["goal"]
+        },
+        {
+            "name": "cause2",
+            "content": "cause2",
+            "effects": ["goal"]
+        },
+        {
+            "name": "cause3",
+            "content": "cause3",
+            "effects": ["cause2"],
+            "effectedby": ["cause4", "cause5"]
+        },
+        {
+            "name": "cause4",
+            "content": "cause4"
+        },
+        {
+            "name": "cause5",
+            "content": "cause5"
+        }
+    ]
+}
+
