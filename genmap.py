@@ -2,6 +2,7 @@
 
 import sys
 import json
+from textwrap import fill
 from optparse import OptionParser
 
 class dot_map:
@@ -11,7 +12,8 @@ class dot_map:
                            'arrowType=normal, style=normal]\n'\
                     'node [shape=record, margin=0];\n'
 
-    def add_node_text(self, name, content, solutions=None, evidence=None):
+    def add_node_text(self, name, content,
+                      solutions=None, evidence=None, linew=15):
         """Add a node's text to the graphviz output.
 
         Args:
@@ -19,6 +21,7 @@ class dot_map:
             content (str): The main content text of the node.
             solutions (list of str): List of solution strings.
             evidence (list of str): List of evidence strings.
+            linew (num): Max characters per line, longer will be wrapped.
 
         """
         tprops = 'cellspacing="0" cellborder="1" border="0"'
@@ -31,19 +34,22 @@ class dot_map:
             # Assemble solutions
             srows = ""
             for s in solutions:
-                srows += '\t\t<tr><td bgcolor="aquamarine">{0}</td></tr>\n'.format(s)
+                ws = fill(s, width=linew).replace("\n", "<br/>")
+                srows += '\t\t<tr><td bgcolor="aquamarine">{0}</td></tr>\n'.format(ws)
 
             # Add in solutions text
             nText += srows
 
         # Add in main content
-        nText += '\t\t<tr><td port="f0">{0}</td></tr>\n'.format(content)
+        wcontent = fill(content, width=linew).replace("\n", "<br/>")
+        nText += '\t\t<tr><td port="f0">{0}</td></tr>\n'.format(wcontent)
 
         if evidence is not None:
             # Assemble evidence
             erows = ""
             for e in evidence:
-                erows += '\t\t<tr><td bgcolor="lightpink">{0}</td></tr>\n'.format(e)
+                we = fill(e, width=linew).replace("\n", "<br/>")
+                erows += '\t\t<tr><td bgcolor="lightpink">{0}</td></tr>\n'.format(we)
 
             # Add in evidence text
             nText += erows
