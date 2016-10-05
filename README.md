@@ -23,3 +23,8 @@ Graphviz has not yet implemented support for "ports" with ortho splines, which i
 
 ## Contributing
 If you would like to contribute to this project, please fork it and make a pull request.
+
+## Example
+Simple:
+
+![sample_outline](https://raw.githubusercontent.com/sradigan/causemapper/master/examples/sample_outline.png "sample_outline")
