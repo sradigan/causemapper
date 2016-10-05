@@ -59,6 +59,71 @@ class dot_map:
                  '> shape=none ];\n'
         self.text += nText
 
+    def add_node_linkage_text(self, dep_tree):
+        """Add node linkage text to the graphviz output
+
+        Args:
+            dep_tree (dict): A dictionary containing a node dependency tree
+
+        """
+        # Generate node linkage and dummy node linkage
+        # dummy nodes "joints" are used to unify lines going to the same node
+        dep_text = ''
+        for n in dep_tree:
+            dep_text += (
+                '{0}_joint[shape="none", label="", width=0, height=0];\n'
+                '{0}_joint -> {0}:f0:e;\n').format(n)
+            for d in dep_tree[n]:
+                dep_text += '{0}:f0:w -> {1}_joint[arrowhead="none"];\n'.format(d, n)
+
+        self.text += dep_text
+
+    def add_rank_text(self, dep_tree):
+        """Add node ranking text to the graphviz output
+
+        Args:
+            dep_tree (dict): A dictionary containing a node dependency tree
+
+        """
+        rank_dict = {}
+        # get list of all nodes
+        key_set = set(dep_tree.keys())
+        value_set = set()
+        # combine all node dependencies into one set
+        for i in dep_tree.values():
+            value_set |= set(i)
+        # get only nodes that are not dependencies of others
+        rank_dict[0] = key_set - value_set
+        # Rank all other nodes
+        irank = 0
+        done = False
+        while not done:
+            done = True
+            irank_dict = rank_dict[irank]
+            irankn = irank + 1
+            for irn in irank_dict:
+                if not irn in dep_tree:
+                    continue
+                for n in dep_tree[irn]:
+                    if not irankn in rank_dict:
+                        rank_dict[irankn] = set()
+                    # add the node to this rank
+                    rank_dict[irankn] |= {n}
+                    done = False
+            irank = irankn
+        # Ensure nodes are only specified in 1 rank
+        for i in range(irank-1,-1,-1):
+            for j in range(0,i):
+                rank_dict[j] -= rank_dict[i]
+
+        rank_text = ''
+        for n in rank_dict:
+            # Only rank sets with more than 1 node
+            if 1 < len(rank_dict[n]):
+                rank_text += '{' + 'rank=same {0}'.format(" ".join(rank_dict[n])) + '}\n'
+
+        self.text += rank_text
+
     def load_map(self, m):
         """Load a cause map from a dictionary.
 
@@ -107,17 +172,10 @@ class dot_map:
                     if not n['name'] in dep_tree[en]:
                         dep_tree[en].append(n['name'])
 
-        # Generate node linkage and dummy node linkage
-        # dummy nodes "joints" are used to unify lines going to the same node
-        dep_text = ''
-        for n in dep_tree:
-            dep_text += (
-                '{0}_joint[shape="none", label="", width=0, height=0];\n'
-                '{0}_joint -> {0}:f0:e;\n').format(n)
-            for d in dep_tree[n]:
-                dep_text += '{0}:f0:w -> {1}_joint[arrowhead="none"];\n'.format(d, n)
+        self.add_node_linkage_text(dep_tree)
+        self.add_rank_text(dep_tree)
 
-        self.text += dep_text + '}\n'
+        self.text += '}\n'
 
 if __name__ == '__main__':
     # Setup commandline option parser
